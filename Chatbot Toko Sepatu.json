@@ -1,0 +1,933 @@
+{
+  "name": "Chatbot Toko Sepatu",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b95bf070-1695-41a6-976a-640c95961553",
+              "name": "session",
+              "value": "={{ $json.session }}",
+              "type": "string"
+            },
+            {
+              "id": "968820c9-d7b0-4c65-94c2-7f6120952bee",
+              "name": "sender_id",
+              "value": "={{ $json.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "2a71b1d8-d2c3-4f1a-8cbc-ba495546f461",
+              "name": "sender_name",
+              "value": "={{ $json.payload._data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "95be7149-ce32-4fe8-a100-5742128c5b1b",
+              "name": "message_body",
+              "value": "={{ $json.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "3882be45-1902-4915-8160-9f0958070613",
+              "name": "Verified Account",
+              "value": "={{ $json.payload._data.verifiedBizName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        16
+      ],
+      "id": "9dac8265-055d-4de6-bcc7-f465717b51cb",
+      "name": "Edit Fields",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# CUSTOMER DATA\n- Nama: {{ $('Edit Fields').item.json.sender_name }}\n- Pesan Terbaru: {{ $('Edit Fields').item.json.message_body }}\n- sender_id: {{ $('Edit Fields').item.json.sender_id }}",
+        "options": {
+          "systemMessage": "# ROLE\nKamu adalah Rizma, CS profesional dari \"Rizma One Footwear\".\n\n# STAGE & INTENT CLASSIFICATION\n\n## STAGE (Progresif: Greeting → Inquiry → Transaction → Support → Closing)\n- Greeting: Sapaan/basa-basi awal.\n- Inquiry: Tanya stok, warna, size, spesifikasi, lokasi.\n- Transaction: Mau beli, minta rekap/rekening, kirim bukti transfer.\n- Support: Komplain, lacak resi, retur, kendala produk.\n- Closing: Ucapan terima kasih / transaksi selesai.\n\n## INTENT\n- Lead (Sapaan/iseng): Jawab ramah, beri pertanyaan terbuka untuk gali kebutuhan.\n- Prospect (Tanya produk): Jawab informatif pakai data yang kamu punya di tool.\n- Hot Prospect (Niat beli tinggi/cara pembayaran): Jawab tegas, to the point, beritahukan bahwa admin akan menangani lebih lanjut untuk hal ini yang memungkinkan ada penawaran spesial seprti promo atau diskon.\n- Expressional (marah/kesal/complain/pembatalan beli): Balas singkat seperlunya, beritahu jika memungkinkan akan kami alihkan percakapan ini ke admin/staff, ucapan terima kasih untuk menunggu.\n\n# TUGAS\n1. Analisis 'Pesan Terbaru' dari customer.\n2. Update STAGE & INTENT nya ke tool \"UPDATE CUSTOMER DATA\"\n3. Jika menanyakan/konsultasi/bingung memilih produk, baca tool 'GET KATALOG DATA' untuk referensi/saran.\n4. Jika menanyakan suatu produk, gunakan tool 'GET PRODUCT DATA'\n4. Jika menanyakan/meminta gambar produk, gunakan tool 'GET PRODUCT DATA' (url_image)\n5. Tulis balasan kamu ke customer secara singkat/inti, pakai intent classification sebagai referensi menjawab.\n\n# GUARDRAILS\n- Evaluasi STAGE bersifat progresif (DILARANG update jika menurunkan STAGE ke tingkat bawahnya).\n- Jangan mengarang dalam membalas.\n- Jangan kirim url_image (link gambar) jika di 'Pesan Terbaru' tidak menanyakan/minta foto atau gambar produk.\n\n# OUTPUT FORMAT\nHANYA keluarkan format 1 baris teks berikut:\n[Teks Balasan Ke Customer] | [url_image] (jika ditanya foto/gambar)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "06609f29-1120-41f4-bdd1-520552e9e60e",
+      "name": "AI Agent",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1e64a54f-6115-46fa-ba40-68b7a97d1913",
+              "leftValue": "={{ $json.sender_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cbdd1f9d-b3df-4061-8160-4b025e9360a5",
+              "leftValue": "={{ $json[\"Verified Account\"] }}",
+              "rightValue": "null",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        16
+      ],
+      "id": "7bbf8510-d262-499d-93e0-21092aca34ad",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('WAHA Trigger').item.json.payload.from }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1520,
+        352
+      ],
+      "id": "d4010ffe-e019-4554-8a8d-701bf20eefb6",
+      "name": "Start Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.sender_id }}",
+        "messageId": "={{ $('WAHA Trigger').item.json.payload.id }}",
+        "participant": "",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        976,
+        0
+      ],
+      "id": "541a6292-e0a6-4fa5-a125-0da02ef07b5f",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * (30 - 25 + 1) + 5)}}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        656
+      ],
+      "id": "a42a7ab0-6bba-409f-9e90-dfa4ce9a614d",
+      "name": "Wait",
+      "webhookId": "86c9ab8c-6904-4442-9224-56de3a02da27"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Stop Typing",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('WAHA Trigger').item.json.payload.id }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        944,
+        656
+      ],
+      "id": "87c33ec9-c875-485e-882e-f48fbe103009",
+      "name": "Stop Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil output teks dari node AI Agent sebelumnya\nconst rawOutput = $json.output || \"\";\n\n// Separator yang digunakan untuk memisah teks dan URL\nconst SEPARATOR = '|';\n\nlet text = rawOutput.trim();\nlet url = \"none\";\n\n// Cek apakah ada karakter separator '|' di dalam output AI\nif (text.includes(SEPARATOR)) {\n  const parts = text.split(SEPARATOR);\n  \n  // Ambil elemen terakhir sebagai URL candidate\n  const potentialUrl = parts.pop().trim();\n  \n  // Sisa elemen digabungkan kembali menjadi pesan teks untuk customer\n  text = parts.join(SEPARATOR).trim();\n\n  // Validasi URL: Hanya anggap sebagai URL jika berawalan http/https dan bukan kata \"none\"\n  if (potentialUrl.toLowerCase() !== \"none\" && /^https?:\\/\\//i.test(potentialUrl)) {\n    url = potentialUrl;\n  }\n}\n\n// Bersihkan karakter markdown bold/italic liar di ujung teks jika ada\ntext = text.replace(/[\\*\\_\\~]+$/, '').trim();\n\n// Output JSON yang bersih untuk node berikutnya (WAHA / IF Node)\nreturn {\n  text: text,\n  url: url\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        0
+      ],
+      "id": "ff8763d6-09d4-4b26-acbb-424db7e33986",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.session }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        320
+      ],
+      "id": "ab61fd71-4805-409b-bead-bbf64d1daab0",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o",
+          "mode": "list",
+          "cachedResultName": "toko_sepatu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1228802495,
+          "mode": "list",
+          "cachedResultName": "customers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit#gid=1228802495"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "sender_id",
+              "lookupValue": "={{ $('Edit Fields').item.json.sender_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1248,
+        656
+      ],
+      "id": "e2240a87-4273-4fc0-bef0-549d2f588a10",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wC53kSt8qEMIaaLW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# TRIGGER",
+        "height": 1008,
+        "width": 288,
+        "color": "#42401A"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -80
+      ],
+      "id": "edfc7cad-934d-4685-9bbc-25cdff489862",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# PROCCES",
+        "height": 1008,
+        "width": 1184,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        528,
+        -80
+      ],
+      "id": "14522d92-7db4-42fb-93c1-9dc26f9bd6d0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        256,
+        0
+      ],
+      "id": "6a15abae-0d28-40ac-a0b3-81aabb4efbd9",
+      "name": "WAHA Trigger",
+      "webhookId": "7ed6c76d-835a-4a2f-9f33-2a4faa4679e0"
+    },
+    {
+      "parameters": {
+        "content": "# OUTPUT HOT\n",
+        "height": 560,
+        "width": 336,
+        "color": "#210D0D"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        -80
+      ],
+      "id": "a61187bf-378c-43df-ae09-f7f7f74fe34f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "817bf203-3460-43b3-a5e4-3bd12925178e",
+              "leftValue": "={{ $('Code in JavaScript').item.json.url }}",
+              "rightValue": "none",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1808,
+        672
+      ],
+      "id": "91c7ec71-f78f-411c-b11b-48ff09b8b1e7",
+      "name": "Request Image ?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2713b930-f4c2-41f8-8d62-bdb4818b4469",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "Expressional",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1520,
+        656
+      ],
+      "id": "b991245f-79bb-4c6a-b204-59d0ddc6d8fc",
+      "name": "Is Urgent ?"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.sender_id }}",
+        "reply_to": "=",
+        "text": "=Customer a.n. {{ $('Edit Fields').item.json.sender_name }} butuh penanganan chat admin langsung, mohon di lakukan follow up secepatnya.  Isi chat nya: {{ $('Edit Fields').item.json.message_body }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1872,
+        256
+      ],
+      "id": "95975b34-9719-4d16-85e2-2dea4d28ef62",
+      "name": "Notif ke Owner/Staff",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Image",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.sender_id }}",
+        "file": "={\n  \"mimetype\": \"image/jpeg\",\n  \"filename\": \"filename.jpg\",\n  \"url\": \"{{ $('Code in JavaScript').item.json.url }}\"\n} ",
+        "caption": "={{ $('Code in JavaScript').item.json.text }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2032,
+        528
+      ],
+      "id": "f1339164-64ff-4cff-ba79-4ae8e4a0f8a2",
+      "name": "Balasan Gambar",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.sender_id }}",
+        "reply_to": "=",
+        "text": "={{ $('Code in JavaScript').item.json.text }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        2032,
+        736
+      ],
+      "id": "40730113-3959-4149-8bfc-b7df8f19732c",
+      "name": "Balasan Text",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "=6287761967377",
+        "reply_to": "=",
+        "text": "={{ $('Code in JavaScript').item.json.text }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1872,
+        48
+      ],
+      "id": "a41a8491-f6ad-42dc-81b8-0bdc0dca285f",
+      "name": "Balasan ke Customer",
+      "credentials": {
+        "wahaApi": {
+          "id": "1Hj8b0gclkmOuOH2",
+          "name": "TRI-0896220"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        320
+      ],
+      "id": "483389ef-fe4a-48c3-b486-fe6a9c1b9700",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "vTJhDo38P4MXCJht",
+          "name": "Riz Gemini Project1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o",
+          "mode": "list",
+          "cachedResultName": "toko_sepatu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1055527494,
+          "mode": "list",
+          "cachedResultName": "products",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit#gid=1055527494"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "product_name",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1312,
+        304
+      ],
+      "id": "b7ede142-c9a4-474d-9d9e-9675948d6d16",
+      "name": "GET PRODUCT DATA",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wC53kSt8qEMIaaLW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# OUTPUT COLD\n",
+        "height": 416,
+        "width": 496,
+        "color": "#0A1338"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        512
+      ],
+      "id": "d6c5ca6d-6385-4a02-886b-83fca49ade2e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o",
+          "mode": "list",
+          "cachedResultName": "toko_sepatu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1228802495,
+          "mode": "list",
+          "cachedResultName": "customers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit#gid=1228802495"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sender_id": "={{ $('Edit Fields').item.json.sender_id }}",
+            "created_at": "={{ $now }}",
+            "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('name', ``, 'string') }}",
+            "stage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('stage', ``, 'string') }}",
+            "intent": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('intent', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "sender_id"
+          ],
+          "schema": [
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sender_id",
+              "displayName": "sender_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stage",
+              "displayName": "stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1120,
+        304
+      ],
+      "id": "e1b3e380-85cf-4339-9fe1-9eed928ea8c0",
+      "name": "UPDATE CUSTOMER DATA",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wC53kSt8qEMIaaLW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o",
+          "mode": "list",
+          "cachedResultName": "toko_sepatu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 476712891,
+          "mode": "list",
+          "cachedResultName": "katalog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OBsi6FsSQdKopntxKe4kkD27DninhlKsJ3-jbE7rp7o/edit#gid=476712891"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        928,
+        304
+      ],
+      "id": "ad9365c6-bec6-471d-a78a-bfd35d0dc2fd",
+      "name": "GET KATALOG DATA",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "wC53kSt8qEMIaaLW",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Start Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Stop Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop Typing": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Start Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Is Urgent ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WAHA Trigger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Image ?": {
+      "main": [
+        [
+          {
+            "node": "Balasan Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Balasan Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Urgent ?": {
+      "main": [
+        [
+          {
+            "node": "Balasan ke Customer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notif ke Owner/Staff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Request Image ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Balasan Gambar": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET PRODUCT DATA": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE CUSTOMER DATA": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET KATALOG DATA": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "UbVH5zflYMTyokj1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "164f1b4e-21da-4a33-b72b-2dc14641a79c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "caed5d5b5bd9589edc41a66664687d97d921cf33bf57ac0453a734858182a525"
+  },
+  "nodeGroups": [],
+  "id": "cIAp02gkAJC72wbG",
+  "tags": []
+}
