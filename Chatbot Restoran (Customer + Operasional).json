@@ -1,0 +1,1240 @@
+{
+  "name": "Chatbot Restoran (Customer + Operasional)",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# ROLE\nKamu adalah Mawan, customer sevice (assistant) yang ramah di Restaurant bernama \"Rizma Food\".\n\n# CUSTOMER KONTEKS & RESPONSE INTRUCTION\n- NAME: {{ $json.message.chat.first_name }}\n## INTENT CLASSIFICATION & RESPONSE INSTRUCTION:\n- INQUIRY\nDefinisi: Permintaan informasi umum yang tersedia\ndi knowledge base. Jawab: langsung, informatif, tone ramah\n- COMPLAINT\nDefinisi: Ekspresi ketidakpuasan, kekecewaan,\natau laporan masalah. Jawab: Acknowledge → Apologize → Act → Assist\n- CLARIFICATION\nDefinisi: Pesan ambigu atau kurang informasi\nuntuk diproses. Jawab: Minta klarifikasi spesifik, 1 pertanyaan saja\n- ESCALATION\nDefinisi: Isu kompleks, emosi tinggi, atau\ndi luar kapasitas bot. Jawab: berikan empati dan bijak\n- RECOMMENDATION\nDefinisi: Permintaan saran atau rekomendasi. Jawab: Berikan opsi terbatas berdasarkan knowledge base\n- SMALL_TALK\nDefinisi: Percakapan di luar topik atau ngetes bot. Jawab: Respon singkat → redirect ke topik utama\n- OUT_OF_SCOPE\nDefinisi: Pertanyaan di luar domain sistem. Jawab: Tolak sopan -> arahkan ke topik yang relevan\n- BOOKING\nDefinisi: Berisi niatan ingin booking tempat untuk nanti. Jawab: Tanyakan dan pastikan melengkapi data booking.\n\n# ANALISA CHAT CUSTOMER SEKARANG: {{ $json.message.text }}\n## JAWAB CHAT CUSTOMER: \n- Balasan singkat dan tidak mengarang.\n- Fokus jawab menggunakan referensi pada CUSTOMER KONTEKS.\n### LIHAT DATA JIKA DIPERLUKAN\n- Gunakan tool 'info restoran' untuk seputar info resotoran.\n- Gunakan tool 'menu dan stok' untuk seputar menu\n- Gunakan tool 'promo' untuk cek promo\n### BOOKING\nGunakan tool 'Booking' untuk update data, tanyakan SAMPAI DATA LENGKAP\n- Booking time : Ubah teks waktu kasual dari user (contoh: \"besok jam 10 pagi\", \"nanti malam jam 7\") menjadi format standar ISO YYYY-MM-DD HH:mm:ss. dengan acuan waktu sekarang.\n- Area : A/B/C/D/E/F\n#### ATURAN BOOKING\nKalau Area sudah ada yang booking, tolak request booking dengan sopan dan kasih pilihan lain.\n\n## KAMU UPDATE CUSTOMER INFO\n### Wajib pakai tool 'customer info' untuk update:\n- nama : {{ $json.message.from.id }}\n- intent : Hasil klasifikasi intent\n\n# OUTPUT: [ini balasan kamu ke customer]",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        80,
+        0
+      ],
+      "id": "4d723439-3b0b-416c-a609-492a20a3d078",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        224
+      ],
+      "id": "fa9d3189-3628-4751-a84b-e7ef9afe9827",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "6TwNucJ6ThL2xGz0",
+          "name": "Riz- DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Trigger Chatbot Customer').first().json.message.from.id }}",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        -80
+      ],
+      "id": "f5b51396-a9a2-487a-ba18-f53f2fa50ded",
+      "name": "Send a text message",
+      "webhookId": "6d51f04b-7926-4168-ad98-fe3232dafe91",
+      "credentials": {
+        "telegramApi": {
+          "id": "PmbRGRYph7HuiUC6",
+          "name": "XL-087761 (Bot1)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "Template-CS Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 656604864,
+          "mode": "list",
+          "cachedResultName": "Promo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=656604864"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        224
+      ],
+      "id": "08a1d153-d265-4ac8-94ab-a2c43ed20ad9",
+      "name": "promo",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 660183191,
+          "mode": "list",
+          "cachedResultName": "Info_Restoran",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=660183191"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        224
+      ],
+      "id": "f1956fac-b881-4341-8cbf-a64a2daa75d6",
+      "name": "info restoran",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 900106500,
+          "mode": "list",
+          "cachedResultName": "Menu_Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=900106500"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        224
+      ],
+      "id": "90ae83c6-fd38-4628-9364-98a200dc716c",
+      "name": "menu dan stok",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9fbc052d-8fe1-4216-85a0-b63c923733fd",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "COMPLAINT",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "6aa25c36-d6f5-4ffe-959b-58e0fafbb4c3",
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "ESCALATION",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "2a6675f5-846c-47bb-9e83-b7d1e4d334a4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "# Human Handover (Eskalasi ke Manusia)",
+        "height": 416,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        96
+      ],
+      "id": "c9c3f521-a680-4e76-aa60-fcef97143d67",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Normal Chatting",
+        "height": 240,
+        "width": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        -160
+      ],
+      "id": "13b95aa6-abb8-4f7c-ab2e-ae540d247cee",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1640972343,
+          "mode": "list",
+          "cachedResultName": "Customer_Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1640972343"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        0
+      ],
+      "id": "61637a04-202f-457c-9a6d-e27db579b1e8",
+      "name": "Intent Checker",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Kamu adalah Admin Assistant untuk Restoran Rizma Food.\n\n# ROLE & TUJUAN:\nMembantu owner/staff mengelola operasional restoran\nlangsung via chat — tanpa perlu buka spreadsheet manual.\n\n# TOOLS YANG KAMU PUNYA:\n## Untuk ambil data menu dan stok\npakai tool 'Cek menu and stok'\n## Untuk ambil data booking\npakai tool 'Cek Data Booking'\n## Untuk update data menu dan stok:\npakai tool 'Update menu and stok'\n## Untuk delete data booking\npakai tool 'Delete Data Booking'\n\n# Permintaan atau Chat Owner/Staff: {{ $('Trigger Chatbot Operasional').item.json.message.text }}\n\n# ATURAN:\n1. Selalu konfirmasi sebelum eksekusi perubahan data:\n   \"Saya akan [aksi]. Konfirmasi? (ya/tidak)\"\n2. Setelah eksekusi, selalu laporkan hasilnya\n3. Jangan pernah hapus data permanen tanpa konfirmasi 2x\n4. Kalau perintah ambigu, tanya klarifikasi dulu\n5. Jawab singkat dan to the point — ini tools kerja, bukan sekedar chatbot",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        -640
+      ],
+      "id": "b0ca42bb-e312-41c6-8251-00e9099424ba",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "content": "# >>> OWNER/STAFF AREA",
+        "height": 544,
+        "width": 1168,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -736
+      ],
+      "id": "657e085a-9f41-44d8-a124-8a8b6ccd02c9",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "#  >>> CUSTOMER AREA",
+        "height": 704,
+        "width": 1168,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -176
+      ],
+      "id": "2d535704-e727-4899-89cb-d311aa6a0632",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Trigger Chatbot Operasional').item.json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        160,
+        -384
+      ],
+      "id": "01fe1f8e-ff87-4d2e-bcff-04a36f0f6bfd",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -384
+      ],
+      "id": "2da5e1dc-9a1e-4708-a318-d4685203a07a",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "6TwNucJ6ThL2xGz0",
+          "name": "Riz- DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1253478935,
+          "mode": "list",
+          "cachedResultName": "Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1253478935"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.message.from.id }}",
+            "Booker name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booker_name', ``, 'string') }}",
+            "Phone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone', ``, 'string') }}",
+            "Total orang": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Total_orang', ``, 'string') }}",
+            "Booking time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Booking_time', ``, 'string') }}",
+            "Area": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Area', ``, 'string') }}",
+            "Key_Owner_Staff": "6885002115"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Booker name",
+              "displayName": "Booker name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total orang",
+              "displayName": "Total orang",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Area",
+              "displayName": "Area",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Booking time",
+              "displayName": "Booking time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Key_Owner_Staff",
+              "displayName": "Key_Owner_Staff",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        368
+      ],
+      "id": "4902f515-e089-45a2-9eb5-d435679001da",
+      "name": "Booking",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=5",
+        "contextWindowLength": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        128,
+        320
+      ],
+      "id": "24d16052-437d-41d8-8579-e6a3445489e3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -496,
+        -384
+      ],
+      "id": "0d02d5f0-be81-45a8-bb41-7dc55407293a",
+      "name": "Trigger Chatbot Operasional",
+      "webhookId": "7217648b-0133-4205-bf0c-025bbfae7c9a",
+      "credentials": {
+        "telegramApi": {
+          "id": "MQiXAOCWn28aKtuu",
+          "name": "XL-087761 (BOTCall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -496,
+        -48
+      ],
+      "id": "7890db65-a1bb-4186-9256-b0bc508115ef",
+      "name": "Trigger Chatbot Customer",
+      "webhookId": "da7845e1-b4f2-4784-9f88-3f1c7ad2c22d",
+      "credentials": {
+        "telegramApi": {
+          "id": "PmbRGRYph7HuiUC6",
+          "name": "XL-087761 (Bot1)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6885002115",
+        "text": "=🔴 ESKALASI BARU  \n\nId: {{ $('Intent Checker').item.json.id }}\nPelanggan: {{ $('Intent Checker').item.json.nama }}\nWaktu: {{ $('Intent Checker').item.json.timestamp }}\nMasalah: {{ $('Intent Checker').item.json.text }}\n\nSegera follow up!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        352
+      ],
+      "id": "6ccd9fd6-f23d-4862-b631-b7b4ebe5d3bf",
+      "name": "Notif ke Owner/Staff",
+      "webhookId": "d950f79f-2f0e-4c77-9b25-6c658661c2dc",
+      "credentials": {
+        "telegramApi": {
+          "id": "MQiXAOCWn28aKtuu",
+          "name": "XL-087761 (BOTCall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Trigger Chatbot Customer').first().json.message.from.id }}",
+        "text": "Halo kak, untuk hal ini Mawan sambungkan  ke tim kami langsung ya 🙏 Ditunggu sebentar, kami segera menghubungi!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        192
+      ],
+      "id": "260d0d48-daa9-40b9-88c0-3caea8c3cbfd",
+      "name": "Pesan Harap tunggu Ke Customer",
+      "webhookId": "aebd8404-83bf-4c9d-8c98-587f630573c1",
+      "credentials": {
+        "telegramApi": {
+          "id": "PmbRGRYph7HuiUC6",
+          "name": "XL-087761 (Bot1)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "68ef1f3b-007a-4c51-abda-c18e3fd0a881",
+              "leftValue": "={{ $json.message.from.id }}",
+              "rightValue": 6885002115,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        -224
+      ],
+      "id": "af553974-723a-461b-9783-63f6295b9806",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "chatId": "=6885002115",
+        "text": "={{ $('AI Agent1').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        -640
+      ],
+      "id": "8cc52afe-4917-4598-b05a-dda1babce579",
+      "name": "Hasil Perubahan Data",
+      "webhookId": "0401deb3-7346-4c54-9ba7-9932369d3ab7",
+      "credentials": {
+        "telegramApi": {
+          "id": "MQiXAOCWn28aKtuu",
+          "name": "XL-087761 (BOTCall)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1640972343,
+          "mode": "list",
+          "cachedResultName": "Customer_Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1640972343"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nama": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nama', ``, 'string') }}",
+            "intent": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('intent', ``, 'string') }}",
+            "text": "={{ $json.message.text }}",
+            "timestamp": "={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}",
+            "id": "={{ $json.message.from.id }}",
+            "date": "={{ $now.toFormat('dd-MM-yyyy') }}",
+            "Key_Owner": "6885002115"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nama",
+              "displayName": "nama",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key_Owner",
+              "displayName": "Key_Owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key_Staff",
+              "displayName": "Key_Staff",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        640,
+        224
+      ],
+      "id": "d301f82d-2d27-48d2-8465-1a2a64a62cc1",
+      "name": "customer info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1253478935,
+          "mode": "list",
+          "cachedResultName": "Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1253478935"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        -400
+      ],
+      "id": "33ed117f-95a8-41c1-a63d-51160dd68626",
+      "name": "Cek Data Booking",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1253478935,
+          "mode": "list",
+          "cachedResultName": "Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1253478935"
+        },
+        "startIndex": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Row_Number', ``, 'number') }}",
+        "numberToDelete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Number_of_Rows_to_Delete', ``, 'number') }}"
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        912,
+        -400
+      ],
+      "id": "4070c5b8-84b2-4335-9ea7-2d52c743c6b3",
+      "name": "Delete Data Booking",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 900106500,
+          "mode": "list",
+          "cachedResultName": "Menu_Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=900106500"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "harga": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('harga', ``, 'string') }}",
+            "terjual_perhari": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('terjual_perhari', ``, 'string') }}",
+            "keterangan": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('keterangan', ``, 'string') }}",
+            "stock": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('stock', ``, 'string') }}",
+            "Key_Owner_Staff": "={{ $json.message.from.id }}"
+          },
+          "matchingColumns": [
+            "Key_Owner_Staff"
+          ],
+          "schema": [
+            {
+              "id": "nama_menu",
+              "displayName": "nama_menu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "harga",
+              "displayName": "harga",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "kategori",
+              "displayName": "kategori",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "terjual_perhari",
+              "displayName": "terjual_perhari",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "keterangan",
+              "displayName": "keterangan",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key_Owner_Staff",
+              "displayName": "Key_Owner_Staff",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        -400
+      ],
+      "id": "332d8f0b-db4f-4ac8-8b21-7b3d71da37a5",
+      "name": "Update menu and stok",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 900106500,
+          "mode": "list",
+          "cachedResultName": "Menu_Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=900106500"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        -400
+      ],
+      "id": "d9ba1f51-7712-49d6-addf-1000ab743c12",
+      "name": "Cek menu and stok",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Intent Checker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "promo": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "info restoran": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "menu dan stok": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pesan Harap tunggu Ke Customer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notif ke Owner/Staff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intent Checker": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Hasil Perubahan Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Chatbot Operasional": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Chatbot Customer": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "customer info": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cek Data Booking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Data Booking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update menu and stok": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cek menu and stok": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cdf1e9de-10bc-419e-88ee-77b1239c83ab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "caed5d5b5bd9589edc41a66664687d97d921cf33bf57ac0453a734858182a525"
+  },
+  "nodeGroups": [],
+  "id": "uYFKb1exQLt6VqJG",
+  "tags": []
+}
