@@ -1,0 +1,245 @@
+{
+  "name": "Chatbot Restoran (Daily Report)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# DAILY REPORT",
+        "height": 560,
+        "width": 1200,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -96
+      ],
+      "id": "320394fa-0a47-4251-9a66-c7dbe201523c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "chatId": "6885002115",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        272
+      ],
+      "id": "d24d60aa-5a6f-4cdc-8579-6e278b5740da",
+      "name": "Report Recapt Daily Restoran",
+      "webhookId": "4c2399f1-3dda-4284-bb00-30de7bb45897",
+      "credentials": {
+        "telegramApi": {
+          "id": "MQiXAOCWn28aKtuu",
+          "name": "XL-087761 (BOTCall)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "17cd7a6a-1802-45df-a99f-99d8ca90473a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1640972343,
+          "mode": "list",
+          "cachedResultName": "Customer_Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1640972343"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "nama"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        0
+      ],
+      "id": "cfd32c74-2302-490d-acc8-bd34836b39c6",
+      "name": "Customer_Info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 900106500,
+          "mode": "list",
+          "cachedResultName": "Menu_Stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=900106500"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "092fd4d2-7599-4cb3-ba54-d749bd2ae0ff",
+      "name": "Menu_Stock",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ",
+          "mode": "list",
+          "cachedResultName": "CS_Restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1253478935,
+          "mode": "list",
+          "cachedResultName": "Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FZCUzgvjmRFu00lKaC3adouOELKZebioF88kq0rwQIQ/edit#gid=1253478935"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        0
+      ],
+      "id": "4fb88280-fac4-4038-85fc-e8df6a86374e",
+      "name": "Booking",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "gS6KCbwMRtJ2EGtq",
+          "name": "Riz Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        272
+      ],
+      "id": "926795fe-a8d5-4bb1-83ea-9cb0ffbe76f9",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Customer_Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer_Info": {
+      "main": [
+        [
+          {
+            "node": "Menu_Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menu_Stock": {
+      "main": [
+        [
+          {
+            "node": "Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Report Recapt Daily Restoran",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7c965aab-b9a7-4da2-885e-9afe24f94464",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "caed5d5b5bd9589edc41a66664687d97d921cf33bf57ac0453a734858182a525"
+  },
+  "nodeGroups": [],
+  "id": "Zi9X6HT4Wi8zBrKH",
+  "tags": []
+}
